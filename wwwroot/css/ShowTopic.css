@@ -1,0 +1,16 @@
+.small-text{
+    font-size: .55em;
+}
+.comment, .create-comment{
+    width: 70%;
+    margin: auto;
+}
+.comment h3{
+    font-size: 1.5em;
+}
+.comment hr{
+    width: 100%;
+}
+h1 .small-text{
+    font-size: .2em;
+}

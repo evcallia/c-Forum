@@ -1,0 +1,77 @@
+@{ ViewData["Title"] = "Forum | Topic"; }
+@using forum.Models
+@model forum.Models.Category
+
+<link rel="stylesheet" href="~/css/ShowCategory.css">
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">Forum</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a asp-controller="Category" asp-action="ShowForum">Home</a></li>
+            <li><a asp-controller="Category" asp-action="ShowCategories">Categories</a></li>
+            <li><a asp-controller="Category" asp-action="ShowSearch">Search</a></li>
+            @if(@ViewBag.AuthLevel == "admin"){
+                <li><a asp-controller="User" asp-action="ShowUsers">Edit Users</a></li>
+            }
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+            <li><a asp-controller="User" asp-action="Logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        <h1>@Model.Name</h1>
+    </div>
+
+    <div class="spacing"></div>
+
+    <div class="list">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Topic</th>
+                    <th>Topic Creator</th>
+                    <th>Date Created</th>
+                    @if(@ViewBag.AuthLevel == "admin" || @ViewBag.IsModerator){
+                        <th>Options</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var topic in @Model.Topics){
+                    <tr>
+                        <td><a asp-controller="Topic" asp-action="ShowTopic" asp-route-id="@topic.Id">@topic.Name</a></td>
+                        <td>@topic.Creator.FirstName</td>
+                        <td>@topic.CreatedAt.ToString("MMM dd, yyyy @ hh:mm tt")</td>
+                        @if(@ViewBag.AuthLevel == "admin" || @ViewBag.IsModerator){
+                            <td><a asp-controller="Topic" class="delete" cId="@Model.Id" asp-action="DeleteTopic" asp-route-topicId="@topic.Id">Delete</a></td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @Html.Partial("TopicForm", (Topic)@ViewBag.NewTopic)
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js" charset="utf-8"></script>
+<script>
+    $(document).on('click', '.delete', function(e){
+        e.preventDefault();
+        $.ajax({
+            url: e.target.href,
+            type: 'DELETE',
+            success: function(r){
+                $.get("/categories/"+$(e.target).attr("cId"), function(res){
+                    $(".list").html($(res).find(".table"));
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,155 @@
+@{ ViewData["Title"] = "Forum | Users"; }
+@model forum.Models.UpdateUser
+
+<link rel="stylesheet" href="~/css/ShowUser.css">
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">Forum</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a asp-controller="Category" asp-action="ShowForum">Home</a></li>
+            <li><a asp-controller="Category" asp-action="ShowCategories">Categories</a></li>
+            <li><a asp-controller="Category" asp-action="ShowSearch">Search</a></li>
+            @if(@ViewBag.AuthLevel == "admin"){
+                <li><a asp-controller="User" asp-action="ShowUsers">Edit Users</a></li>
+            }
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            @if(@ViewBag.Self){
+                <li><a class="active" asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+            }else{
+                <li><a asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+            }
+            <li><a asp-controller="User" asp-action="Logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        <h1>Edit User</h1>
+    </div>
+
+    <div class="spacing"></div>
+
+    <div class="user_info">
+        <form asp-controller="User" asp-action="UpdateUser" asp-route-userId="@Model.Id" method="POST" role="form">
+            <div class="attributes">
+                <div class="form-group row">
+                    <div class="col-xs-2"></div>
+                    <label asp-for="FirstName" class="col-xs-3 col-form-label">First Name: </label>
+                    <div class="col-xs-5">
+                        <input class="form-control" asp-for="FirstName">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-5 error">
+                        <span asp-validation-for="FirstName"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-2"></div>
+                    <label asp-for="LastName" class="col-xs-3 col-form-label">Last Name: </label>
+                    <div class="col-xs-5">
+                        <input class="form-control" asp-for="LastName">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-5 error">
+                        <span asp-validation-for="LastName"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-2"></div>
+                    <label asp-for="Email" class="col-xs-3 col-form-label">Email: </label>
+                    <div class="col-xs-5">
+                        <input class="form-control" asp-for="Email">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-5 error">
+                        <span asp-validation-for="Email"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-2"></div>
+                    <label asp-for="Password" class="col-xs-3 col-form-label">New Password </label>
+                    <div class="col-xs-5">
+                        <input class="form-control" asp-for="Password">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-5 error">
+                        <span asp-validation-for="Password"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-xs-2"></div>
+                    <label asp-for="PasswordConfirmation" class="col-xs-3 col-form-label">Confirm New Password </label>
+                    <div class="col-xs-5">
+                        <input class="form-control" asp-for="PasswordConfirmation">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-5 error">
+                        <span asp-validation-for="PasswordConfirmation"></span>
+                    </div>
+                </div>
+                @if(@ViewBag.Self){
+                    <div class="form-group row">
+                        <div class="col-xs-2"></div>
+                        <label asp-for="OldPassword" class="col-xs-3 col-form-label">Old Password </label>
+                        <div class="col-xs-5">
+                            <input class="form-control" asp-for="OldPassword">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-3"></div>
+                        <div class="col-xs-5 error">
+                            <span asp-validation-for="OldPassword"></span>
+                        </div>
+                    </div>
+                }
+                <div class="col-xs-2"></div>
+                <button type="submit" class="btn btn-default">Update</button>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-xs-8"></div>
+            <div class="col-xs-3">
+                @if(@ViewBag.AuthLevel == "admin" && @ViewBag.OtherAuthLevel != "admin"){
+                    <a asp-controller="User" asp-action="DeleteUser" asp-route-userId="@Model.Id"><button class="btn btn-danger">Delete User</button></a>
+                }
+            </div>
+        </div>
+    </div>
+    @if(@ViewBag.AuthLevel == "admin"){
+        <div class="moderator_options">
+            <h3>Moderator Options</h3>
+            @foreach(var category in @ViewBag.Categories){
+                <div class="checkbox">
+                @if(@Model.ModeratedCategories.Any(uc => uc.Category.Id == category.Id)){
+                    <label><input type="checkbox" user="@Model.Id" category="@category.Id" checked>@category.Name</label>
+                }else{
+                    <label><input type="checkbox" user="@Model.Id" category="@category.Id">@category.Name</label>
+                }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js" charset="utf-8"></script>
+<script>
+    $('input[type=checkbox]').click(function(){
+        var input = $(this);
+        $.get(`/update-moderator/${input.attr('category')}/${input.attr('user')}`);
+    });
+</script>

@@ -1,0 +1,50 @@
+@{ ViewData["Title"] = "Forum | Users"; }
+@model List<forum.Models.User>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">Forum</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a asp-controller="Category" asp-action="ShowForum">Home</a></li>
+            <li><a asp-controller="Category" asp-action="ShowCategories">Categories</a></li>
+            <li><a asp-controller="Category" asp-action="ShowSearch">Search</a></li>
+            <li class="active"><a asp-action="ShowUsers">Edit Users</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+            <li><a asp-controller="User" asp-action="Logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        <h1>All Users</h1>
+    </div>
+
+    <div class="spacing"></div>
+
+    <div class="list">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Options</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var user in @Model){
+                    <tr>
+                        <td>@user.FirstName @user.LastName</td>
+                        <td>@user.Email</td>
+                        <td><a asp-action="EditUser" asp-route-userId="@user.Id">Edit</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

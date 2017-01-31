@@ -1,0 +1,100 @@
+@{ ViewData["Title"] = "Forum | Categories"; }
+@using forum.Models
+@model List<forum.Models.Category>
+
+    <link rel="stylesheet" href="~/css/Categories.css">
+
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="">Forum</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a asp-controller="Category" asp-action="ShowForum">Home</a></li>
+                <li class="active"><a asp-controller="Category" asp-action="ShowCategories">Categories</a></li>
+                <li><a asp-controller="Category" asp-action="ShowSearch">Search</a></li>
+                @if(@ViewBag.AuthLevel == "admin"){
+                    <li><a asp-controller="User" asp-action="ShowUsers">Edit Users</a></li>
+                }
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+                <li><a asp-controller="User" asp-action="Logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome">
+            <h1>All Categories</h1>
+        </div>
+
+        <div class="spacing"></div>
+
+        <div class="list">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Number of Topics</th>
+                        <th>Moderators</th>
+                        @if(@ViewBag.AuthLevel == "admin"){
+                            <th>Options</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var category in @Model){
+                        <tr>
+                            <td><a asp-controller="Category" asp-action="ShowCategory" asp-route-id="@category.Id">@category.Name</a></td>
+                            <td>@category.Topics.Count</td>
+                            @{
+                                string moderators = "";
+                                if(@category.Moderators.Count > 0){
+                                    moderators = @category.Moderators[0].Moderator.FirstName;
+                                }
+                                for(int i = 1; i < @category.Moderators.Count; i++){
+                                    moderators += ", " + @category.Moderators[i].Moderator.FirstName;
+                                }
+                                <td>@moderators</td>
+                                if(@ViewBag.AuthLevel == "admin"){
+                                    <td><a class="delete" asp-controller="Category" asp-action="DeleteCategory" asp-route-categoryId="@category.Id">Delete</a></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="create-category">
+            @if(@ViewBag.AuthLevel == "admin"){
+                <form asp-controller="Category" asp-action="CreateCategory" method="POST" role="form">
+                    <div class="form-group row">
+                        <div class="col-xs-4">
+                            <input class="form-control" type="text" name="Name" placeholder="Enter category name...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-default">Add Category</button>
+                </form>
+            }
+            @if(@ViewBag.Error != null){
+                <p class="error">@ViewBag.Error</p>
+            }
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.js" charset="utf-8"></script>
+    <script>
+        $(document).on('click', '.delete', function(e){
+            e.preventDefault();
+            $.ajax({
+                url: e.target.href,
+                type: 'DELETE',
+                success: function(r){
+                    $.get("/categories", function(res){
+                        $(".list").html($(res).find(".table"));
+                    });
+                }
+            });
+        });
+    </script>

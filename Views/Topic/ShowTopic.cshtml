@@ -1,0 +1,85 @@
+@using forum.Models
+@model forum.Models.Topic
+@{ ViewData["Title"] = "Forum | Topic"; }
+
+<link rel="stylesheet" href="~/css/ShowTopic.css">
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">Forum</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a asp-controller="Category" asp-action="ShowForum">Home</a></li>
+            <li><a asp-controller="Category" asp-action="ShowCategories">Categories</a></li>
+            <li><a asp-controller="Category" asp-action="ShowSearch">Search</a></li>
+            @if(@ViewBag.AuthLevel == "admin"){
+                <li><a asp-controller="User" asp-action="ShowUsers">Edit Users</a></li>
+            }
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+            <li><a asp-controller="User" asp-action="Logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        <h1>
+            @Model.Name
+            @if(@ViewBag.AuthLevel == "admin" || @ViewBag.IsModerator){
+                 <span class="small-text"> - <a topicId="@Model.Id">Delete</a></span>
+            }
+        </h1>
+        <hr>
+        <h2>@Model.Description <span class="small-text"> &nbsp &nbsp &nbsp - @Model.Creator.FirstName on @Model.CreatedAt.ToString("MMM dd, yyyy")</span></h2>
+    </div>
+
+    <div class="spacing"></div>
+
+    @foreach(var comment in @Model.Comments.OrderBy(c => c.CreatedAt)){
+        <div class="comment">
+            <h3>
+                @comment.Commentor.FirstName  -  @comment.CreatedAt 
+                @if(ViewBag.AuthLevel == "admin" || ViewBag.UserId == comment.CommentorId){
+                    <a class="small-text" commentId="@comment.Id" asp-controller="Topic" asp-action="DeleteComment">Delete</a>
+                }
+            </h3>
+            <p>@comment.Content</p>
+            <hr>
+        </div>
+    }
+    @Html.Partial("CommentForm", (Comment)@ViewBag.NewComment)
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js" charset="utf-8"></script>
+<script>
+    $(document).on('click', '.comment a', function(e){
+        e.preventDefault();
+        var target = $(e.target);
+        $.ajax({
+            url: `/comments/${target.attr('commentId')}`,
+            type: 'DELETE',
+            success: function(res){
+                if(res == true){
+                    target.parent().parent().remove();
+                }
+            }
+        });
+    }); 
+
+    $(document).on('click', '.welcome a', function(e){
+        e.preventDefault();
+        var target = $(e.target);
+        $.ajax({
+            url: `/topics/${target.attr('topicId')}`,
+            type: 'DELETE',
+            success: function(res){
+                if(res.success == true){
+                    location.href = `/categories/${res.id}`;
+                }
+            }
+        });
+    });   
+</script>
