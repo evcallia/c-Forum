@@ -62,6 +62,8 @@ namespace forum.Controllers
                 ViewBag.Errors = TempData["Errors"];
             }
             Topic topic = _context.Topics.Where(t => t.Id == id).Include(t => t.Creator).Include(t => t.Comments).ThenInclude(c => c.Commentor).SingleOrDefault();
+            topic.Views += 1;
+            _context.SaveChanges();
             User user = await GetCurrentUserAsync();
             ViewBag.UserId = user.Id;
             ViewBag.AuthLevel = await GetCurrentUserAuthorizationLevelAsync();
@@ -128,6 +130,16 @@ namespace forum.Controllers
                 return true;
             }
             return false;
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("search")]
+        public IActionResult Search(string input, string searchType){
+            if(searchType == "topics"){
+                return new ObjectResult(_context.Topics.Where(t => t.Name.ToLower().Contains(input.ToLower())).OrderByDescending(t => t.CreatedAt).ToList());
+            }
+            return new ObjectResult(_context.Categories.Where(c => c.Name.ToLower().Contains(input.ToLower())).OrderByDescending(c => c.CreatedAt).ToList());
         }
 
 

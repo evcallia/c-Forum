@@ -1,3 +1,10 @@
 .top, .recent{
     text-align: center;
 }
+.topic{
+    width: 40%;
+    margin: auto;
+}
+.bold{
+    font-weight: bold;
+}

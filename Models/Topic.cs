@@ -15,6 +15,8 @@ namespace forum.Models
         [Required(ErrorMessage = "Please enter a description for the topic")]
         public string Description {get; set;}
 
+        public int Views {get; set;}
+
         public DateTime CreatedAt {get; set;}
         public DateTime UpdatedAt {get; set;}
 

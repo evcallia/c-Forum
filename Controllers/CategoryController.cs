@@ -30,10 +30,10 @@ namespace forum.Controllers
         public async Task<IActionResult> ShowForum()
         {
             User user = await GetCurrentUserAsync();
-            // run query for getting top topics of the day
-
+            // run query for getting top topics
+            ViewBag.Popular = _context.Topics.OrderByDescending(t => t.Views).Take(5).ToList();
             // run query for getting Recent topics of the day
-
+            ViewBag.Recent = _context.Topics.OrderByDescending(t => t.CreatedAt).Take(5).ToList();
             ViewBag.AuthLevel = await GetCurrentUserAuthorizationLevelAsync();
             return View("Home");
         }
@@ -45,7 +45,7 @@ namespace forum.Controllers
         {
             ViewBag.Error = TempData["error"];
             ViewBag.AuthLevel = await GetCurrentUserAuthorizationLevelAsync();
-            return View("Categories", _context.Categories.Include(c => c.Topics).Include(c => c.Moderators).ThenInclude(m => m.Moderator).ToList());
+            return View("Categories", _context.Categories.OrderBy(c => c.Name.ToUpperInvariant()).Include(c => c.Topics).Include(c => c.Moderators).ThenInclude(m => m.Moderator).ToList());
         }
 
         [Authorize]        
@@ -64,7 +64,9 @@ namespace forum.Controllers
             }else{
                 TempData["error"] = "A name is required";
             }
-            //TODO: Pass model back in TempData/viewbag so the form is not cleared on error
+            if(TempData["error"] != null){
+                return RedirectToAction("ShowCategories");
+            }
             return RedirectToAction("ShowCategory", new {id = newCategory.Id});
         }
 
@@ -104,6 +106,14 @@ namespace forum.Controllers
             _context.SaveChanges();
             return true;
         } 
+
+        [Authorize]        
+        [HttpGet]
+        [Route("search")]
+        public async Task<IActionResult> ShowSearch(){
+            ViewBag.AuthLevel = await GetCurrentUserAuthorizationLevelAsync();
+            return View("Search", new List<Category>());
+        }
 
         //return user if signed in
         private Task<User> GetCurrentUserAsync()

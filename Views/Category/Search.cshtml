@@ -1,0 +1,79 @@
+@{ ViewData["Title"] = "Forum | Search"; }
+@model List<forum.Models.Category>
+
+<link rel="stylesheet" href="~/css/Search.css">
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">Forum</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a asp-controller="Category" asp-action="ShowForum">Home</a></li>
+            <li><a asp-controller="Category" asp-action="ShowCategories">Categories</a></li>
+            <li class="active"><a asp-controller="Category" asp-action="ShowSearch">Search</a></li>
+            @if(@ViewBag.AuthLevel == "admin"){
+                <li><a asp-controller="User" asp-action="ShowUsers">Edit Users</a></li>
+            }
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a asp-controller="User" asp-action="EditUser" asp-route-userId="0"><span class="glyphicon glyphicon-user"></span> Profile</a></li>
+            <li><a asp-controller="User" asp-action="Logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        <h1>Search</h1>
+        <hr>
+    </div>
+
+    <div class="form">
+        <form asp-controller="Topic" asp-action="Search" method="POST">
+            <input type="text" name="input" placeholder="Search for a topic or category...">
+            <input type="radio" name="searchType" value="topics" checked> Topic
+            <input type="radio" name="searchType" value="categories"> Category
+            <input class="btn btn-default" type="submit" value="Search">
+        </form>
+    </div>
+
+    <div class="results">
+
+    </div>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.js" charset="utf-8"></script>
+<script>
+    $('form').submit(function(e){
+        e.preventDefault();
+        var form = $(this);
+        $.post(form.attr('action'), form.serialize(), function(res){
+            var html = "<h2>There are no results, sorry</h2>";
+            if(res.length != 0){
+                html = `<table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                        <tbody>`;
+                for(var i = 0; i < res.length; i++){
+                    var date = new Date(res[i].createdAt);
+                    var month = date.getMonth()+1;
+                    var day = date.getDate();
+                    var year = date.getFullYear();
+                    html += `
+                        <tr>
+                            <td><a href="/${form.find('[name=searchType]:checked').val()}/${res[i].id}">${res[i].name}</a></td>
+                            <td>${month}/${day}/${year}</td>
+                        </tr>`;
+                }
+                html += `</tbody>
+                    </table>`;
+            }
+            $(".results").html(html);
+        });
+    });
+</script>

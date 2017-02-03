@@ -1,0 +1,10 @@
+.form input{
+    margin-left: 1em;
+}
+.form input[type=text]{
+    width: 40%;
+    border-radius: 5px;
+}
+.form{
+    text-align: center;
+}
